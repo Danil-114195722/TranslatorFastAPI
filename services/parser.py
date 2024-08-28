@@ -8,8 +8,13 @@ from fake_useragent import UserAgent
 SITE_URL = 'https://wooordhunt.ru/word/'
 
 
-# перевод с русского
 async def translate_from_ru(word: str) -> str:
+    """
+    Перевод с русского
+    :param word: russian word to translate
+    :return: translated word in english
+    """
+
     # применение user_agent
     user_agent = UserAgent()
     headers = {
@@ -39,8 +44,13 @@ async def translate_from_ru(word: str) -> str:
     return translation
 
 
-# перевод с английского
 async def translate_from_en(word: str) -> (str, str):
+    """
+    Перевод с английского
+    :param word: english word to translate
+    :return: translated word in russian and english transcription
+    """
+
     # применение user_agent
     user_agent = UserAgent()
     headers = {
