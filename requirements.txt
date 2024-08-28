@@ -4,4 +4,5 @@ beautifulsoup4==4.12.3
 fake-useragent==1.5.1
 
 fastapi==0.112.2
+pydantic==2.8.2
 uvicorn==0.30.6

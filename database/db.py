@@ -1,14 +1,18 @@
 import aiosqlite
 
-from settings.settings import BASEDIR
+from settings.settings import BASEDIR, logger
 
 
 class Database:
     def __init__(self):
         pass
 
-    async def create_tables(self):
-        """Создание таблиц"""
+    async def create_tables(self) -> str | None:
+        """
+        Создание таблиц
+        :return: error/None
+        """
+
         try:
             async with aiosqlite.connect(f"{BASEDIR}/database/sqlite/db.sqlite3") as connection:
                 # таблица ru-en
@@ -24,55 +28,55 @@ class Database:
                                           translation VARCHAR(255) NOT NULL,
                                           transcription VARCHAR(75) NOT NULL
                                    );''')
-                await connection.close()
+            return None
         except Exception as err:
-            # TODO: добавить логирование ошибки
-            print("неизвестная ошибка:", str(err))
+            logger.critical(f'Unknown error: {err}')
+            return "unknown error"
 
-    async def get_from_rus_vocab(self, word: str) -> str | None:
+    async def get_from_rus_vocab(self, word: str) -> tuple[str, str | None]:
         """
         Получение перевода русского слова из таблицы rus_vocab (если есть), если нет - None
         :param word:
-        :return: translation or None
+        :return: translation and error/None
         """
         try:
             async with aiosqlite.connect(f"{BASEDIR}/database/sqlite/db.sqlite3") as connection:
                 async with connection.execute(f"SELECT * FROM rus_vocab WHERE word=\'{word}\';") as cursor:
                     row = await cursor.fetchone()
                     if not row:
-                        return None
+                        logger.warning(f'Word {word} not found in "eng_vocab" table')
+                        return "", "not found"
                     else:
-                        return row[2]
+                        return row[2], None
         except Exception as err:
-            # TODO: добавить логирование ошибки
-            print("неизвестная ошибка:", str(err))
-            return None
+            logger.critical(f'Unknown error: {err}')
+            return "", "unknown error"
 
-    async def get_from_eng_vocab(self, word: str) -> tuple[str, str] | None:
+    async def get_from_eng_vocab(self, word: str) -> tuple[str, str, str | None]:
         """
         Получение перевода и транскрипции английского слова из таблицы eng_vocab (если есть), если нет - None
         :param word:
-        :return: translation or None
+        :return: translation, transcription and error/None
         """
         try:
             async with aiosqlite.connect(f"{BASEDIR}/database/sqlite/db.sqlite3") as connection:
                 async with connection.execute(f"SELECT * FROM eng_vocab WHERE word=\'{word}\';") as cursor:
                     row = await cursor.fetchone()
                     if not row:
-                        return None
+                        logger.warning(f'Word {word} not found in "eng_vocab" table')
+                        return "", "", "not found"
                     else:
-                        return row[2], row[3]
+                        return row[2], row[3], None
         except Exception as err:
-            # TODO: добавить логирование ошибки
-            print("неизвестная ошибка:", str(err))
-            return None
+            logger.critical(f'Unknown error: {err}')
+            return "", "", "unknown error"
 
-    async def add_to_rus_vocab(self, word: str, translation: str) -> bool:
+    async def add_to_rus_vocab(self, word: str, translation: str) -> str | None:
         """
         Добавление перевода русского слова в таблицу rus_vocab
         :param word:
         :param translation:
-        :return: result of operation
+        :return: error/None
         """
         try:
             async with aiosqlite.connect(f"{BASEDIR}/database/sqlite/db.sqlite3") as connection:
@@ -80,21 +84,22 @@ class Database:
                 # если зафиксировано одно изменение, то всё хорошо
                 if connection.total_changes == 1:
                     await connection.commit()
-                    return True
+                    logger.info(f'Added word "{word}" to "rus_vocab" table')
+                    return None
                 else:
-                    return False
+                    logger.critical('Error while insert new translation to "rus_vocab" table')
+                    return "insert error"
         except Exception as err:
-            # TODO: добавить логирование ошибки
-            print("неизвестная ошибка:", str(err))
-            return False
+            logger.critical(f'Unknown error: {err}')
+            return "unknown error"
 
-    async def add_to_eng_vocab(self, word: str, translation: str, transcription: str) -> bool:
+    async def add_to_eng_vocab(self, word: str, translation: str, transcription: str) -> str | None:
         """
         Добавление перевода и транскрипции английского слова в таблицу eng_vocab
         :param word:
         :param translation:
         :param transcription:
-        :return: result of operation
+        :return: error/None
         """
         try:
             async with aiosqlite.connect(f"{BASEDIR}/database/sqlite/db.sqlite3") as connection:
@@ -102,13 +107,14 @@ class Database:
                 # если зафиксировано одно изменение, то всё хорошо
                 if connection.total_changes == 1:
                     await connection.commit()
-                    return True
+                    logger.info(f'Added word "{word}" to "eng_vocab" table')
+                    return None
                 else:
-                    return False
+                    logger.critical('Error while insert new translation to "eng_vocab" table')
+                    return "insert error"
         except Exception as err:
-            # TODO: добавить логирование ошибки
-            print("неизвестная ошибка:", str(err))
-            return False
+            logger.critical(f'Unknown error: {err}')
+            return "unknown error"
 
 
 # if __name__ == "__main__":
