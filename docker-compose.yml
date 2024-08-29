@@ -1,0 +1,12 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: translator_fastapi
+    restart: always
+    env_file:
+      - .env
+    command: sh /root/app/start_app.sh prod
+    ports:
+      - "8001:8001"
