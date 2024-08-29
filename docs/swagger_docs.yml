@@ -1,0 +1,130 @@
+openapi: 3.0.0
+
+
+info:
+  title: FastAPI Translator
+  description: Get ru-en and en-ru word translation
+  version: 1.0.0
+
+
+servers:
+  - description: Production server
+    url: http://best-edu-server:8001
+  - description: Development server
+    url: http://127.0.0.1:8000
+
+
+paths:
+  /:
+    get:
+      summary: Greetings from FastAPI Translator
+      operationId: index__get  # будет добавляться в path страницы при открывании описания этого ресурса
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /from-en/{word}:
+    get:
+      summary: Get translation and transcription of english word
+      operationId: from_en__get
+      parameters:
+        - required: true
+          schema:
+            title: English word
+            type: string
+            example: "dog"
+          name: word
+          in: path
+        - required: false
+          schema:
+            title: Get transcription
+            type: boolean
+            default: true
+          name: transcription
+          in: query
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  word:
+                    type: string
+                  translation:
+                    type: string
+                  transcription:
+                    type: string
+        '400':
+          description: Given invalid data from user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /from-ru:
+    post:
+      summary: Get translation of russian word
+      operationId: from_ru__post
+      requestBody:
+        description: Russian word
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                word:
+                  type: string
+                  example: "кот"
+              required:
+                - word
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  word:
+                    type: string
+                  translation:
+                    type: string
+        '400':
+          description: Given invalid data from user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+components:
+  schemas:
+    Error:
+      title: Error
+      type: object
+      properties:
+        error:
+          title: Error description
+          type: string

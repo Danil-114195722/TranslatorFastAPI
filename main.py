@@ -2,14 +2,22 @@ from re import match as re_match
 
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
+from yaml import safe_load as yaml_safe_load
 
 from database.db import Database
 from services import parser
 from services.post_models import RussianWord
+from settings.settings import BASEDIR
 
 
-app = FastAPI()
+app = FastAPI(redoc_url=None)
 db = Database()
+
+with open(f'{BASEDIR}/docs/swagger_docs.yml') as yaml_swagger_docs:
+    # Чтение YAML-файла
+    custom_openapi = yaml_safe_load(yaml_swagger_docs)
+    # Заменяем стандартную OpenAPI схему на свою
+    app.openapi = lambda: custom_openapi
 
 
 @app.get("/")
