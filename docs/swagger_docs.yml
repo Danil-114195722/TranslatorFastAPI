@@ -9,7 +9,7 @@ info:
 
 servers:
   - description: Production server
-    url: http://best-edu-server:8001
+    url: http://best-edu-server.ru:8001
   - description: Development server
     url: http://127.0.0.1:8000
 
