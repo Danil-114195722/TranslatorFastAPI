@@ -6,7 +6,7 @@ from pathlib import Path
 BASEDIR = Path(__file__).parent.parent
 
 # настройка логирования
-logger = logging.getLogger('flask-server')
+logger = logging.getLogger('fast-api-server')
 logging.basicConfig(
     level=logging.INFO,
     filename=f'{BASEDIR}/logs/views_logs.log',
